@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gender Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        #upload-form {
+            max-width: 500px;
+            width: 100%;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        #image-preview {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        #image-preview img {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 20px;
+        }
+
+        #upload-input {
+            display: none;
+        }
+
+        #predict-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px; /* Add space above the button */
+        }
+
+        #predict-button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="upload-form">
+        <h2>Gender Prediction</h2>
+        <form id="predict-form" enctype="multipart/form-data">
+            <div id="image-preview">
+                <img id="preview-img" src="#" alt="Image Preview">
+            </div>
+            <input type="file" id="upload-input" accept="image/*" name="file">
+            <br><label for="upload-input" style="margin-bottom: 10px;">Choose an image</label>
+            <button type="button" id="predict-button">Predict Gender</button>
+            <div id="error-message" class="error" style="display: none;">Please upload a photo.</div>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('upload-input').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            var previewImg = document.getElementById('preview-img');
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('predict-button').addEventListener('click', function() {
+            var fileInput = document.getElementById('upload-input');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                document.getElementById('error-message').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('error-message').style.display = 'none';
+
+            var formData = new FormData(document.getElementById('predict-form'));
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                var resultDiv = document.getElementById('result');
+                resultDiv.textContent = 'Predicted Gender: ' + data.gender;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
